@@ -1,0 +1,80 @@
+{
+  "AI/ML Engineer": {
+    "required": {
+      "Python": "Advanced",
+      "Machine Learning": "Advanced",
+      "Deep Learning": "Intermediate",
+      "LLM Integration": "Intermediate",
+      "Databases": "Intermediate",
+      "Git/GitHub": "Intermediate",
+      "Docker": "Beginner",
+      "Cloud Deployment": "Beginner"
+    }
+  },
+  "Data Scientist": {
+    "required": {
+      "Python": "Advanced",
+      "Data Analysis": "Advanced",
+      "Machine Learning": "Intermediate",
+      "SQL": "Intermediate",
+      "Databases": "Beginner",
+      "Communication": "Intermediate"
+    }
+  },
+  "Full Stack Developer": {
+    "required": {
+      "JavaScript": "Advanced",
+      "React": "Advanced",
+      "Node.js": "Intermediate",
+      "SQL": "Intermediate",
+      "Git/GitHub": "Intermediate",
+      "Cloud Deployment": "Beginner",
+      "Docker": "Beginner"
+    }
+  },
+  "Data Analyst": {
+    "required": {
+      "SQL": "Advanced",
+      "Data Analysis": "Advanced",
+      "Python": "Intermediate",
+      "Communication": "Intermediate",
+      "Databases": "Beginner"
+    }
+  },
+  "Computer Vision Engineer": {
+    "required": {
+      "Python": "Advanced",
+      "Computer Vision": "Advanced",
+      "Deep Learning": "Intermediate",
+      "Machine Learning": "Intermediate",
+      "Git/GitHub": "Intermediate",
+      "Docker": "Beginner"
+    }
+  },
+  "Cybersecurity Analyst": {
+    "required": {
+      "Python": "Intermediate",
+      "Cloud Deployment": "Intermediate",
+      "CI/CD": "Beginner",
+      "Communication": "Intermediate",
+      "Problem Solving": "Advanced"
+    }
+  },
+  "Cloud Engineer": {
+    "required": {
+      "Cloud Deployment": "Advanced",
+      "Docker": "Advanced",
+      "CI/CD": "Intermediate",
+      "Python": "Intermediate",
+      "Git/GitHub": "Intermediate"
+    }
+  },
+  "UI/UX Designer": {
+    "required": {
+      "React": "Intermediate",
+      "Tailwind CSS": "Intermediate",
+      "Communication": "Advanced",
+      "Problem Solving": "Intermediate"
+    }
+  }
+}

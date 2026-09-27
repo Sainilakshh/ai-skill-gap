@@ -1,0 +1,42 @@
+{
+  "Languages": {
+    "Python": ["python", "py"],
+    "JavaScript": ["javascript", "js", "es6"],
+    "TypeScript": ["typescript", "ts"],
+    "C++": ["c++", "cpp"],
+    "C": [" c ", "c language"],
+    "Java": ["java"],
+    "SQL": ["sql", "mysql", "postgresql", "postgres"]
+  },
+  "Frameworks": {
+    "React": ["react", "reactjs", "react.js"],
+    "Node.js": ["node", "nodejs", "node.js", "express"],
+    "Next.js": ["next.js", "nextjs"],
+    "PySide/Qt": ["pyside", "qt6", "qt "],
+    "Tailwind CSS": ["tailwind"],
+    "Vite": ["vite"]
+  },
+  "AI/ML": {
+    "Machine Learning": ["machine learning", "ml model", "scikit-learn", "sklearn"],
+    "Computer Vision": ["opencv", "computer vision", "mediapipe"],
+    "NLP": ["nlp", "natural language processing", "transformers"],
+    "LLM Integration": ["llm", "openai api", "groq", "gemini api", "ollama", "prompt engineering"],
+    "Deep Learning": ["deep learning", "pytorch", "tensorflow", "keras"]
+  },
+  "Data": {
+    "Data Analysis": ["pandas", "numpy", "data analysis"],
+    "Databases": ["sqlite", "sqlalchemy", "mongodb", "firebase", "supabase"],
+    "Vector Search": ["lancedb", "embeddings", "rag", "vector database"]
+  },
+  "Cloud/DevOps": {
+    "Git/GitHub": ["git", "github"],
+    "Docker": ["docker", "container"],
+    "Cloud Deployment": ["vercel", "netlify", "aws", "azure", "gcp", "cloud"],
+    "CI/CD": ["ci/cd", "github actions", "continuous integration"]
+  },
+  "Soft Skills": {
+    "Leadership": ["led a team", "team lead", "mentored"],
+    "Communication": ["presented", "communication", "documentation"],
+    "Problem Solving": ["problem solving", "debugging", "optimized"]
+  }
+}
