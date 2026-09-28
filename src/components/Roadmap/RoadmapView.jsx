@@ -13,8 +13,8 @@ function ChainLink(props) {
   )
 }
 
-export function RoadmapView({ roadmap }) {
-  const [done, setDone] = useState({})
+export function RoadmapView({ roadmap, doneSkills = [], onToggle, baseMatch, matchPercent }) {
+  const done = Object.fromEntries(doneSkills.map((n) => [n, true]))
   const [hoveredGap, setHoveredGap] = useState(null)
 
   if (roadmap.length === 0) {
@@ -36,7 +36,15 @@ export function RoadmapView({ roadmap }) {
           <h2 className="font-display text-2xl font-semibold text-white">Your roadmap</h2>
           <p className="mt-1 text-sm text-white/50">Ordered by priority, based on your current gaps.</p>
         </div>
-        <p className="text-xs text-white/40">{doneCount}/{roadmap.length} · Level {doneCount + 1}</p>
+        <div className="text-right">
+          <p className="text-xs text-white/40">{doneCount}/{roadmap.length} · Level {doneCount + 1}</p>
+          {baseMatch != null && (
+            <p className="mt-0.5 text-sm font-semibold text-white">
+              <span className="text-white/40">{baseMatch}%</span> → <span className="text-cyan">{matchPercent}%</span>
+              <span className="ml-1 text-[11px] font-normal text-white/40">role match</span>
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="mt-4 h-2.5 rounded-full bg-white/10 overflow-hidden">
@@ -64,7 +72,7 @@ export function RoadmapView({ roadmap }) {
               <CardContainer>
                 <CardBody className="rounded-xl border border-line bg-panel/50 p-4 flex items-start gap-4">
                   <button
-                    onClick={() => setDone((d) => ({ ...d, [item.skill]: !d[item.skill] }))}
+                    onClick={() => onToggle(item.skill)}
                     className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs transition ${
                       done[item.skill]
                         ? 'border-emerald-400 bg-emerald-400/20 text-emerald-300'
@@ -87,6 +95,16 @@ export function RoadmapView({ roadmap }) {
                     </div>
                     <p className="mt-1 text-xs text-cyan">{item.weeks}</p>
                     <p className="mt-1.5 text-sm text-white/60">{item.action}</p>
+                    {(item.resource || item.hours) && (
+                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                        {item.resource && (
+                          <a href={item.resource.url} target="_blank" rel="noreferrer" className="text-violet hover:underline">
+                            {item.resource.label} ↗
+                          </a>
+                        )}
+                        {item.hours && <span className="text-white/40">~{item.hours} hrs</span>}
+                      </div>
+                    )}
                   </CardItem>
                 </CardBody>
               </CardContainer>

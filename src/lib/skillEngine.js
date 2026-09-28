@@ -1,5 +1,6 @@
 import taxonomy from '../data/skillTaxonomy.json'
 import roleProfiles from '../data/roleProfiles.json'
+import { SKILL_RESOURCES } from '../data/skillResources'
 
 const LEVELS = ['None', 'Beginner', 'Intermediate', 'Advanced']
 
@@ -194,11 +195,14 @@ export function buildRoadmap(gaps) {
   let week = 1
   return missingOrPartial.map((g) => {
     const span = g.gapSize >= 2 ? 3 : 2
+    const r = SKILL_RESOURCES[g.skill]
     const item = {
       skill: g.skill,
       weeks: `Week ${week}-${week + span - 1}`,
-      action: RESOURCE_HINTS[g.skill] || RESOURCE_HINTS.default,
+      action: r?.project || RESOURCE_HINTS[g.skill] || RESOURCE_HINTS.default,
       priority: g.gapSize >= 2 ? 'High' : 'Medium',
+      resource: r ? { label: r.label, url: r.url } : null,
+      hours: r ? (g.gapSize >= 2 ? r.hours : Math.ceil(r.hours * 0.6)) : null,
     }
     week += span
     return item
@@ -207,3 +211,10 @@ export function buildRoadmap(gaps) {
 
 export const ROLE_NAMES = Object.keys(roleProfiles)
 export { roleProfiles }
+
+// --- 8. Rank every role against the same skill set ---
+export function rankRoles(allSkills) {
+  return ROLE_NAMES
+    .map((role) => ({ role, matchPercent: computeGap(allSkills, role).matchPercent }))
+    .sort((a, b) => b.matchPercent - a.matchPercent)
+}

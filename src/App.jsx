@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuroraBackground } from './components/ui/AuroraBackground'
 import { FloatingDock } from './components/ui/FloatingDock'
 import { Landing } from './components/Landing/Landing'
 import { UploadForm } from './components/Analysis/UploadForm'
-import { SkillGraph3D } from './components/SkillDNA/SkillGraph3D'
+const SkillGraph3D = lazy(() => import('./components/SkillDNA/SkillGraph3D').then((m) => ({ default: m.SkillGraph3D })))
 import { EvidencePanel } from './components/SkillDNA/EvidencePanel'
 import { RoleSelector } from './components/TargetRole/RoleSelector'
 import { GapReport } from './components/Gap/GapReport'
@@ -14,7 +14,7 @@ import { LoginModal } from './components/Auth/LoginModal'
 import { HistoryList } from './components/History/HistoryList'
 import {
   extractExplicitSkills, extractGithubSkills, mergeSkills,
-  inferHiddenSkills, computeGap, buildRoadmap, makeManualSkill,
+  inferHiddenSkills, computeGap, buildRoadmap, makeManualSkill, rankRoles, findCategory,
 } from './lib/skillEngine'
 import { inferSkillsWithAI, extractRequirementsFromJD } from './lib/aiClient'
 import { onAuthChange, getCurrentUser, signOut, saveAnalysis } from './lib/history'
@@ -80,6 +80,42 @@ export default function App() {
   const [inputSummary, setInputSummary] = useState('')
   const [savedToHistory, setSavedToHistory] = useState(false)
   const [saveError, setSaveError] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  // Load a shared profile from the URL hash (#s=...), no backend needed.
+  useEffect(() => {
+    if (!window.location.hash.startsWith('#s=')) return
+    try {
+      const { r, s } = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(3))))
+      setBaseSkills(s.map(([name, type, evidenceCount]) => ({
+        name, type, evidenceCount, category: findCategory(name), evidence: ['From a shared Skill DNA profile'],
+      })))
+      if (r) setTargetRole(r)
+      setInputSummary('Shared profile')
+      setScreen('dna')
+    } catch { /* bad link — ignore */ }
+  }, [])
+
+  async function handleShare() {
+    const payload = { r: targetRole, s: baseSkills.map((k) => [k.name, k.type, k.evidenceCount]) }
+    const url = `${window.location.origin}${window.location.pathname}#s=${btoa(encodeURIComponent(JSON.stringify(payload)))}`
+    try { await navigator.clipboard.writeText(url) } catch { window.prompt('Copy your link:', url) }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  // Roadmap progress persists per role so it survives refreshes.
+  const doneKey = (role) => `skilldna:done:${role || 'custom'}`
+  useEffect(() => {
+    try { setAddedSkillNames(JSON.parse(localStorage.getItem(doneKey(targetRole)) || '[]')) } catch { setAddedSkillNames([]) }
+  }, [targetRole])
+  function updateAdded(fn) {
+    setAddedSkillNames((prev) => {
+      const next = fn(prev)
+      try { localStorage.setItem(doneKey(targetRole), JSON.stringify(next)) } catch { /* storage blocked */ }
+      return next
+    })
+  }
 
   useEffect(() => {
     getCurrentUser().then(setUser)
@@ -97,7 +133,17 @@ export default function App() {
     return computeGap(allSkills, targetRole, customRequirements)
   }, [allSkills, targetRole, customRequirements])
 
-  const roadmap = useMemo(() => buildRoadmap(gaps), [gaps])
+  // Roadmap is built from the un-simulated gaps so ticked items stay visible (and tickable).
+  const baseGap = useMemo(() => {
+    if (!targetRole && !customRequirements) return { gaps: [], matchPercent: 100 }
+    return computeGap(baseSkills, targetRole, customRequirements)
+  }, [baseSkills, targetRole, customRequirements])
+  const roadmap = useMemo(() => buildRoadmap(baseGap.gaps), [baseGap])
+  const ranking = useMemo(() => rankRoles(allSkills), [allSkills])
+
+  function handleToggleRoadmap(skill) {
+    updateAdded((prev) => (prev.includes(skill) ? prev.filter((n) => n !== skill) : [...prev, skill]))
+  }
 
   const whatIfSuggestions = useMemo(() => {
     return gaps.filter((g) => g.status !== 'met').map((g) => g.skill).filter((s) => !addedSkillNames.includes(s)).slice(0, 8)
@@ -175,7 +221,7 @@ export default function App() {
   }
 
   function handleAddWhatIf(skillName) {
-    setAddedSkillNames((prev) => [...prev, skillName])
+    updateAdded((prev) => (prev.includes(skillName) ? prev : [...prev, skillName]))
   }
 
   function handleAuthed(u) {
@@ -199,7 +245,6 @@ export default function App() {
   function handleReloadHistory(item) {
     setBaseSkills(item.skills_json || [])
     setTargetRole(item.target_role === 'Custom job description' ? null : item.target_role)
-    setAddedSkillNames([])
     setSavedToHistory(true)
     setShowHistory(false)
     setScreen('dna')
@@ -246,6 +291,12 @@ export default function App() {
             {hasResults && (
               <div className="text-right">
                 <button
+                  onClick={handleShare}
+                  className="mr-2 rounded-lg border border-line px-3 py-2 text-xs text-white/60 hover:text-white hover:border-white/30"
+                >
+                  {copied ? 'Link copied ✓' : 'Share link'}
+                </button>
+                <button
                   onClick={handleSaveToHistory}
                   disabled={savedToHistory}
                   className="rounded-lg border border-line px-3 py-2 text-xs text-white/60 hover:text-white hover:border-white/30 disabled:opacity-50"
@@ -265,7 +316,9 @@ export default function App() {
             </div>
           ) : (
             <div className="mt-6 grid lg:grid-cols-[1fr_320px] gap-5">
-              <SkillGraph3D skills={allSkills} onSelectSkill={setSelectedSkill} selectedSkill={selectedSkill} />
+              <Suspense fallback={<div className="h-[440px] rounded-2xl border border-line bg-panel/40 flex items-center justify-center text-sm text-white/40">Loading 3D graph…</div>}>
+                <SkillGraph3D skills={allSkills} onSelectSkill={setSelectedSkill} selectedSkill={selectedSkill} />
+              </Suspense>
               <EvidencePanel skill={selectedSkill} />
             </div>
           )}
@@ -286,6 +339,7 @@ export default function App() {
           <RoleSelector
             selectedRole={targetRole}
             hasCustomRequirements={Boolean(customRequirements)}
+            ranking={ranking}
             onSelectRole={(r) => { setTargetRole(r); setCustomRequirements(null) }}
           />
           <div className="mx-auto max-w-3xl px-6 flex justify-end pb-10">
@@ -326,7 +380,7 @@ export default function App() {
             addedSkills={addedSkillNames}
             matchPercent={matchPercent}
             onAdd={handleAddWhatIf}
-            onReset={() => setAddedSkillNames([])}
+            onReset={() => updateAdded(() => [])}
           />
           <div className="mx-auto max-w-3xl px-6 flex justify-end pb-10">
             <button
@@ -339,7 +393,7 @@ export default function App() {
         </>
       )}
 
-      {screen === 'roadmap' && <RoadmapView roadmap={roadmap} />}
+      {screen === 'roadmap' && <RoadmapView roadmap={roadmap} doneSkills={addedSkillNames} onToggle={handleToggleRoadmap} baseMatch={baseGap.matchPercent} matchPercent={matchPercent} />}
         </motion.div>
       </AnimatePresence>
 
