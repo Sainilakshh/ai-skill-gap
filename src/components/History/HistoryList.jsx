@@ -3,10 +3,15 @@ import { listAnalyses } from '../../lib/history'
 
 export function HistoryList({ user, onReload, onClose }) {
   const [items, setItems] = useState([])
+  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    listAnalyses(user.id).then((data) => { setItems(data); setLoading(false) })
+    listAnalyses(user.id).then((res) => {
+      setItems(res.items)
+      setError(res.ok ? null : res.error)
+      setLoading(false)
+    })
   }, [user.id])
 
   return (
@@ -18,7 +23,14 @@ export function HistoryList({ user, onReload, onClose }) {
         </div>
 
         {loading && <p className="mt-4 text-sm text-white/40">Loading…</p>}
-        {!loading && items.length === 0 && (
+
+        {!loading && error && (
+          <div className="mt-4 rounded-lg bg-rose-400/10 border border-rose-400/30 px-3 py-2.5">
+            <p className="text-xs text-rose-300">{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && items.length === 0 && (
           <p className="mt-4 text-sm text-white/40">No saved analyses yet — run one and it'll show up here.</p>
         )}
 

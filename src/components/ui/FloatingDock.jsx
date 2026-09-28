@@ -1,13 +1,27 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
 export function FloatingDock({ items, activeId, onSelect }) {
   const [hovered, setHovered] = useState(null)
+  const [wiggling, setWiggling] = useState(false)
+
+  useEffect(() => {
+    let seen = false
+    try { seen = localStorage.getItem('skilldna_dock_intro_shown') === '1' } catch {}
+    if (!seen) {
+      setWiggling(true)
+      const t = setTimeout(() => {
+        setWiggling(false)
+        try { localStorage.setItem('skilldna_dock_intro_shown', '1') } catch {}
+      }, 1400)
+      return () => clearTimeout(t)
+    }
+  }, [])
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
       <div className="flex items-end gap-2 rounded-2xl border border-line bg-panel/80 backdrop-blur-xl px-3 py-2.5 shadow-2xl">
-        {items.map((item) => {
+        {items.map((item, i) => {
           const isActive = item.id === activeId
           const isHovered = item.id === hovered
           const scale = isHovered ? 1.25 : isActive ? 1.1 : 1
@@ -17,8 +31,12 @@ export function FloatingDock({ items, activeId, onSelect }) {
               onMouseEnter={() => setHovered(item.id)}
               onMouseLeave={() => setHovered(null)}
               onClick={() => onSelect(item.id)}
-              animate={{ scale, y: isHovered ? -6 : 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              animate={
+                wiggling
+                  ? { rotate: [0, -8, 8, -6, 6, 0], transition: { delay: i * 0.08, duration: 0.6 } }
+                  : { scale, y: isHovered ? -6 : 0 }
+              }
+              transition={wiggling ? undefined : { type: 'spring', stiffness: 400, damping: 20 }}
               className={`relative flex h-11 w-11 items-center justify-center rounded-xl ${
                 isActive ? 'bg-violet/20 text-violet' : 'text-white/60 hover:text-white'
               }`}

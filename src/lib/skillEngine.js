@@ -79,6 +79,7 @@ export function findCategory(skillName) {
 
 // Used by the WHAT IF simulation — treats a manually added skill as
 // "Intermediate" evidence-equivalent so it visibly moves the needle.
+// justAdded flags it so the 3D graph can play a celebratory burst on mount.
 export function makeManualSkill(name) {
   return {
     name,
@@ -86,6 +87,7 @@ export function makeManualSkill(name) {
     type: 'explicit',
     evidenceCount: 3,
     evidence: ['Added via WHAT IF simulation'],
+    justAdded: true,
   }
 }
 
