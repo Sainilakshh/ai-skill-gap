@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ParticlesBackground } from './components/ui/ParticlesBackground'
+import { AuroraBackground } from './components/ui/AuroraBackground'
 import { FloatingDock } from './components/ui/FloatingDock'
 import { Landing } from './components/Landing/Landing'
 import { UploadForm } from './components/Analysis/UploadForm'
@@ -209,9 +209,9 @@ export default function App() {
   const dockItems = user ? DOCK_ITEMS : DOCK_ITEMS
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative isolate">
       <div className="noise-overlay" />
-      <ParticlesBackground />
+      <AuroraBackground />
 
       <AnimatePresence mode="wait">
         <motion.div

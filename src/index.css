@@ -36,3 +36,23 @@ button:not(:disabled) {
 button:not(:disabled):active {
   transform: scale(0.96);
 }
+
+/* Aurora background — slow drift, long durations so it reads as ambient, not busy */
+@keyframes aurora-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(9vw, 7vh, 0) scale(1.12); }
+  66%      { transform: translate3d(-5vw, 12vh, 0) scale(0.94); }
+}
+@keyframes aurora-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  40%      { transform: translate3d(-12vw, 8vh, 0) scale(1.15); }
+  75%      { transform: translate3d(-4vw, -6vh, 0) scale(0.92); }
+}
+@keyframes aurora-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  30%      { transform: translate3d(10vw, -9vh, 0) scale(1.1); }
+  70%      { transform: translate3d(16vw, 4vh, 0) scale(0.96); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none !important; }
+}
